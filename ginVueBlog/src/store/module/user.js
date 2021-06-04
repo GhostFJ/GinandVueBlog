@@ -5,7 +5,7 @@ const userModule = {
   namespaced: true,
   state: {
     token: storageService.get(storageService.USER_TOKEN),
-    //userInfo: storageService.get(storageService.USER_INFO) ? JSON.parse(storageService.get(storageService.USER_INFO)) : null, //eslint-disable-line
+    userInfo: storageService.get(storageService.USER_INFO) ? storageService.get(storageService.USER_INFO) : null, //eslint-disable-line
   },
   mutations: {
     SET_TOKEN(state, token) {
@@ -17,7 +17,7 @@ const userModule = {
 
     SET_USERINFO(state, userInfo) {
       // 更新本地缓存
-      storageService.set(storageService.USER_INFO, JSON.stringify(userInfo));
+      storageService.set(storageService.USER_INFO, userInfo);
       // 更新state
       state.userInfo = userInfo;
     },
@@ -56,7 +56,7 @@ const userModule = {
           return userService.info();
         }).then((res) => {
           // 保存用户信息
-          context.commit('SET_USERINFO', res.data.data.username);
+          context.commit('SET_USERINFO', res.data.data.data.username);
           resolve(res);
         }).catch((err) => {
           reject(err);

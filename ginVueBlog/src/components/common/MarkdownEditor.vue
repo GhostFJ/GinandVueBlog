@@ -150,3 +150,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.tui-scrollsync {
+  display: none !important;
+}
+</style>

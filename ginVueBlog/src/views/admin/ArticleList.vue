@@ -90,7 +90,7 @@
             <el-col :xs="24" :sm="24" :md="12" :lg="8">
               <div class="tool-container-item">
                 <el-button
-                  type="info"
+                  type="primary"
                   size="small"
                   icon="el-icon-edit"
                   @click="handleNew"
@@ -112,6 +112,13 @@
           </el-link>
         </template>
       </el-table-column>
+
+      <el-table-column prop="title" label="简介" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.desc }}
+        </template>
+      </el-table-column>
+
       <el-table-column prop="category" label="分类" show-overflow-tooltip>
         <template slot-scope="scope">
           <span :class="{ meta: scope.row.category }">{{
@@ -119,7 +126,14 @@
           }}</span>
         </template>
       </el-table-column>
-      <el-table-column
+      <el-table-column prop="tag" label="标签" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <span :class="{ meta: scope.row.tag }">{{
+            scope.row.tag
+          }}</span>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column
         prop="listShow"
         label="列表显示"
         width="80"
@@ -150,7 +164,7 @@
           ></i>
           <i v-else class="el-icon-minus" style="font-size: 24px"></i>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         prop="status"
         label="状态"
@@ -245,10 +259,10 @@ export default {
             this.init();
         },
         handleNew() {
-            this.$router.push('/article/publish')
+            this.$router.push('/admin/article/publish')
         },
         handleEdit(id) {
-            this.$router.push('/article/publish/' + id)
+            this.$router.push('/admin/article/publish/' + id)
         },
         handleDelete(id) {
             this.$confirm('此操作将永久删除该文章, 是否继续?', '提示', {
@@ -270,14 +284,17 @@ export default {
                 let article = {
                     id: data.id,
                     title: data.title,
-                    frontUrl: this.$util.getServerFrontPostUrl(data.id),
-                    publish: this.$dayjs(data.created).format('YYYY-MM-DD HH:mm'),
-                    modified: this.$dayjs(data.modified).format('YYYY-MM-DD HH:mm'),
+                    desc: data.desc,
+                    frontUrl: this.$util.getServerFrontPostUrl(data.id),  // 前台链接
+                    publish: this.$dayjs.unix(data.created_on).format('YYYY-MM-DD HH:mm'),
+                    modified: this.$dayjs.unix(data.modified_on).format('YYYY-MM-DD HH:mm'),
+                    tag: data.tag.name ? data.tag.name : '',
                     category: data.category ? data.category.name : '',
-                    listShow: data.listShow,
-                    headerShow: data.headerShow,
-                    status: this.$static.ArticleStatus.getValue(data.status),
-                    priority: this.$static.ArticlePriority.getValue(data.priority)
+                    // listShow: data.listShow,
+                    // headerShow: data.headerShow,
+                    status: data.state ? '启用' : '禁用',
+                    priority: '普通'  // 当前默认普通，优先级等之后修改
+                    // this.$static.ArticlePriority.getValue(data.priority)
                 }
                 this.articleData.push(article)
             }
@@ -289,10 +306,10 @@ export default {
             })
         },
         init() {
-            this.$api.auth.pageArticle(this.currentPage, this.tool).then(data => {
-                this.initArticleData(data.data.list)
-                this.total = data.data.total
-                this.pageSize = data.data.pageSize
+            this.$api.auth.pageArticle(this.currentPage, this.tool).then(res => {
+                this.initArticleData(res.data.data.lists)
+                this.total = res.data.data.total
+                //this.pageSize = data.data.pageSize
             })
         }
     },

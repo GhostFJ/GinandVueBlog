@@ -103,13 +103,9 @@ export default {
   width: 0 !important;
 }
 
-@media (min-width: 575px) {
-  .container {
-    max-width: 100%;
-  }
-}
 .container {
-  padding: 0 i !important;
+  max-width: 100% !important;
+  padding: 0  !important;
   min-height: calc(100vh);
 }
 

@@ -1,9 +1,12 @@
 <template>
   <div class="nav-bar">
     <div class="collapse">
-      <a @click="collapse"><span class="icon-th-list"></span></a>
+      <a @click="collapse">
+        <i v-if="!iscollapse" class="el-icon-s-fold"></i>
+        <i v-else class="el-icon-s-unfold"></i>
+      </a>
     </div>
-    <h3 class="title">Fame Dashboard</h3>
+    <h3 class="title">Fang's Blog</h3>
     <ul class="nav-bar-right">
       <li>
         <a @click="logout">
@@ -17,8 +20,14 @@
 
 <script type="text/ecmascript-6">
 export default {
+  data() {
+    return {
+      iscollapse: false,
+    }
+  },
   methods: {
-    collapse: function () {
+    collapse() {
+      this.iscollapse = !this.iscollapse
       this.$root.$emit('side-bar-collapse')
     },
     logout() {
@@ -47,14 +56,14 @@ export default {
   width: 100%;
   height: 100%;
   display: inline-block;
-  background-color: #fff;
+  background-color: rgb(206, 235, 240);
   line-height: 60px;
   text-align: center;
   box-shadow: 0 2px 3px hsla(0, 0%, 7%, 0.1), 0 0 0 1px hsla(0, 0%, 7%, 0.1);
 }
 
 .collapse {
-  display: none;
+  display: block;
   float: left;
   width: 64px;
 }
@@ -68,11 +77,11 @@ export default {
   list-style: none;
   float: right;
   margin: 0 15px 0 0;
-  color: #7f8c8d;
+  color: #262a2b;
 }
 
 .nav-bar-right a {
-  color: #7f8c8d;
+  color: #2f3435;
   cursor: pointer;
   text-decoration: none;
 }

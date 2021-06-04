@@ -7,7 +7,12 @@
       :model="article"
     >
       <el-row :gutter="30">
-        <el-col :xs="24" :sm="16" :md="19" :lg="19">
+        <el-col
+          :xs="24"
+          :sm="16"
+          :md="19"
+          :lg="19"
+        >
           <el-form-item prop="title">
             <el-input
               v-model="article.title"
@@ -23,12 +28,18 @@
             <!-- 键修饰符，键别名 -->
           </el-form-item>
         </el-col>
-        <el-col :xs="24" :sm="8" :md="5" :lg="5">
+        <el-col
+          :xs="24"
+          :sm="8"
+          :md="5"
+          :lg="5"
+        >
           <div class="panel">
             <div class="panel-content">
               <el-form-item label="标签">
                 <el-select
                   v-model="article.tagIds"
+                  value-key="label"
                   multiple
                   filterable
                   placeholder="请选择文章标签"
@@ -115,18 +126,26 @@
                 </el-date-picker>
               </el-form-item>
               <el-form-item>
-                <el-button size="small" @click="showMediaDialog(1)"
-                  >媒体库
+                <el-button
+                  size="small"
+                  @click="showMediaDialog(1)"
+                >媒体库
                 </el-button>
               </el-form-item>
               <el-form-item>
                 <el-button-group>
                   <el-row>
-                    <el-button type="success" size="small" @click="onSave"
-                      >保存
+                    <el-button
+                      type="success"
+                      size="small"
+                      @click="onSave"
+                    >保存
                     </el-button>
-                    <el-button type="primary" size="small" @click="onPublish"
-                      >发布
+                    <el-button
+                      type="primary"
+                      size="small"
+                      @click="onPublish"
+                    >发布
                     </el-button>
                     <el-button
                       type="info"
@@ -139,8 +158,7 @@
                         "
                         target="_blank"
                         style="color: #ffffff"
-                        >查看</a
-                      >
+                      >查看</a>
                     </el-button>
                   </el-row>
                 </el-button-group>
@@ -196,6 +214,7 @@
 import MarkdownEditor from '@/components/common/MarkdownEditor'
 import MediaItem from '@/components/common/MediaItem'
 import Upload from '@/components/common/Upload'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -205,7 +224,7 @@ export default {
   },
   data: function () {
     return {
-      editorHeight: document.documentElement.clientHeight - 250 + 'px',
+      editorHeight: document.documentElement.clientHeight - 200 + 'px',
       mediaDialog: false,
       isMobile: false,
       submitting: false,
@@ -247,8 +266,8 @@ export default {
       const id = this.$route.params.id
       // 如果有id则表示编辑文章,获取文章信息
       if (id) {
-        this.$api.auth.getArticle(id).then((data) => {
-          this.initArticle(data.data)
+        this.$api.auth.getArticle(id).then((res) => {
+          this.initArticle(res.data.data)
         })
       } else {
         // 如果没有id则表示新增文章,初始化文章信息
@@ -272,43 +291,44 @@ export default {
     initArticle(data) {
       this.article.id = data.id
       this.article.title = data.title
-      this.article.tagIds = data.tags.map((item) => item.id)
+      this.article.tagIds =  [data.tag_id]
       this.article.categoryId = data.category ? data.category.id : null
       this.article.content = data.content
-      this.article.status = data.status
-      this.article.listShow = data.listShow
-      this.article.headerShow = data.headerShow
-      this.article.priority = data.priority
+      this.article.status = data.state ? '启用' : '禁用';
+      // this.article.listShow = data.listShow
+      // this.article.headerShow = data.headerShow
+      this.article.priority = data.priority  //暂时注释
       this.article.allowComment = data.allowComment
-      this.article.created = new Date(data.created).getTime()
-      this.article.modified = new Date(data.modified).getTime()
+      this.article.created = new Date(data.created_on * 1000).getTime()
+      this.article.modified = new Date(data.modified_on * 1000).getTime()
     },
     getTags() {
-      this.$api.auth.getAllTags().then((data) => {
-        if (data.success) {
-          this.tags = data.data
+      this.$api.auth.getAllTags().then((res) => {
+        if (res.status == 200) {
+          this.tags = res.data.data.list
+          
         } else {
           this.$util.message.error('获取标签列表失败')
         }
       })
     },
     getCategories() {
-      this.$api.auth.getAllCategories().then((data) => {
-        if (data.success) {
-          for (let key in data.data) {
-            // if (!data.data.hasOwnProperty(key)) {
-            //   continue
-            // }
-            let category = {
-              value: data.data[key].id,
-              label: data.data[key].name,
-            }
-            this.categories.push(category)
-          }
-        } else {
-          this.$util.message.error('获取分类列表失败')
-        }
-      })
+      // this.$api.auth.getAllCategories().then((data) => {
+      //   if (data.success) {
+      //     for (let key in data.data) {
+      //       // if (!data.data.hasOwnProperty(key)) {
+      //       //   continue
+      //       // }
+      //       let category = {
+      //         value: data.data[key].id,
+      //         label: data.data[key].name,
+      //       }
+      //       this.categories.push(category)
+      //     }
+      //   } else {
+      //     this.$util.message.error('获取分类列表失败')
+      //   }
+      // })
     },
     showMediaDialog(page = 1) {
       this.isMobile = document.body.clientWidth < 768
@@ -349,7 +369,7 @@ export default {
           })
       }
     },
-    submitArticle(formName, success) {
+    submitArticle(type, formName, success) {
       if (this.submitting) {
         this.$util.message.warning('请不要提交过快!')
         return
@@ -357,28 +377,49 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.submitting = true
-          let params = this.article
-          this.$api.auth.saveArticle(params).then((data) => {
-            if (data.success) {
-              success(data.data)
+          let params = {
+            id: this.article.id,
+            tag_id: this.article.tag_id,
+            title: this.article.title,
+            desc: this.article.desc,
+            content: this.article.content,
+            modified_by: this.userInfo
+          }
+
+          if(type == 'put') {
+            this.$api.auth.modifyArticle(params).then(res => {
+              if (res.status == 200) {
+              success(res.data.data)
             } else {
-              this.$util.message.error('提交文章失败,' + data.msg)
+              this.$util.message.error('提交文章失败,' + res.data.msg)
+            }
+            this.submitting = false
+            })
+          }
+          else{
+            this.$api.auth.saveArticle(params).then(res => {
+            if (res.status == 200) {
+              success(res.data.data)
+            } else {
+              this.$util.message.error('提交文章失败,' + res.data.msg)
             }
             this.submitting = false
           })
+          }
+          
         }
       })
     },
     onPublish() {
       const _this = this
-      this.submitArticle('postForm', function () {
+      this.submitArticle('post','postForm', () => {
         _this.$util.message.success('发布文章成功!')
-        _this.$router.push('/article')
+        _this.$router.push('/admin/article')
       })
     },
     onSave() {
       const _this = this
-      this.submitArticle('postForm', function (data) {
+      this.submitArticle('put','postForm', data =>{
         _this.$util.message.success('保存文章成功!')
         _this.$route.params.id = data.id
         _this.getArticle()
@@ -390,6 +431,9 @@ export default {
       this.getCategories()
     },
   },
+  computed: mapState({
+    userInfo: (state) => state.userModule.userInfo,
+  }),
   mounted() {
     this.init()
   },

@@ -7,27 +7,27 @@
       active-text-color="#ffd04b"
       :router="true"
     >
-      <el-menu-item index="/dashboard">
+      <el-menu-item index="/admin/dashboard">
         <i class="el-icon-monitor"></i>
-        <span slot="title">仪表盘</span>
+        <span slot="title">总览</span>
       </el-menu-item>
-      <el-menu-item index="/article">
+      <el-menu-item index="/admin/article">
         <i class="el-icon-document-copy"></i>
         <span slot="title">文章列表</span>
       </el-menu-item>
-      <el-menu-item index="/comment">
+      <el-menu-item index="/admin/comment">
         <i class="el-icon-chat-dot-round"></i>
         <span slot="title">评论列表</span>
       </el-menu-item>
-      <el-menu-item index="/meta">
+      <el-menu-item index="/admin/meta">
         <i class="el-icon-copy-document"></i>
         <span slot="title">标签/分类</span>
       </el-menu-item>
-      <el-menu-item index="/media">
+      <el-menu-item index="/admin/media">
         <i class="el-icon-copy-document"></i>
         <span slot="title">媒体库</span>
       </el-menu-item>
-      <el-menu-item index="/setting">
+      <el-menu-item index="/admin/setting">
         <i class="el-icon-setting"></i>
         <span slot="title">网站设置</span>
       </el-menu-item>
