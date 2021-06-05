@@ -13,8 +13,15 @@ const auth = {
   saveArticle(article) {
     return request.post('/articles', article)
   },
-  modifyArticle(params) {
-    return request.put('/articles/' + params.id, {params})
+  modifyArticle(param) {
+    return request.put('/articles/' + param.id, {
+      id: param.id,
+      tag_id: param.tag_id,
+      title: param.title,
+      desc: param.desc,
+      content: param.content,
+      modified_by: param.modified_by
+    })
   },
   deleteArticle(id) {
     return request.delete('/articles/' + id)

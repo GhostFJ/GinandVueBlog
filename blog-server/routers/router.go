@@ -3,14 +3,15 @@ package routers
 import (
 	"blog/middleware"
 	"blog/pkg/setting"
-	"github.com/gin-gonic/gin"
-	"github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+
+	v1 "blog/controller/api/v1"
 	_ "blog/docs"
 	"blog/middleware/jwt"
-	"blog/controller/api/v1"
 )
 
 func InitRouter() *gin.Engine {

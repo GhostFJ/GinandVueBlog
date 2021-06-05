@@ -16,10 +16,7 @@ import (
 // @title Blog API
 // @version 1.0
 // @description  Blog
-// @termsOfService http://wikis.tech/
 
-// @contact.name zskj
-// @contact.url https://github.com/zskj
 
 // @host localhost:8000
 // @BasePath /

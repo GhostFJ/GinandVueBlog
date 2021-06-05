@@ -9,7 +9,6 @@ const USER_INFO = `${USER_PREFIX}info`;
 
 // 储存
 const set = (key, data) => {
-  console.log(data);
   localStorage.setItem(key, data);
 };
 

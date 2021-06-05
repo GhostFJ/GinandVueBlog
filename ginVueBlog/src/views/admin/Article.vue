@@ -17,8 +17,20 @@
             <el-input
               v-model="article.title"
               placeholder="请输入文章标题"
-            ></el-input>
+            >
+            <template slot="prepend">标题:</template>
+            </el-input>
           </el-form-item>
+
+          <el-form-item prop="desc">
+            <el-input
+              v-model="article.desc"
+              placeholder="请输入简述"
+            >
+            <template slot="prepend">简述:</template>
+            </el-input>
+          </el-form-item>
+
           <el-form-item prop="content">
             <markdown-editor
               v-model="article.content"
@@ -39,7 +51,7 @@
               <el-form-item label="标签">
                 <el-select
                   v-model="article.tagIds"
-                  value-key="label"
+                  value-key="name"
                   multiple
                   filterable
                   placeholder="请选择文章标签"
@@ -77,6 +89,16 @@
                   :active-text="this.$static.ArticleStatus.PUBLISH.value"
                   :inactive-text="this.$static.ArticleStatus.DRAFT.value"
                 >
+                </el-switch>
+              </el-form-item>
+              <el-form-item>
+                <el-switch
+                  v-model="article.state"
+                  active-color="#13ce66"
+                  active-value= 1
+                  inactive-value= 0
+                  active-text="启用"
+                  inactive-text="禁用">
                 </el-switch>
               </el-form-item>
               <el-form-item>
@@ -231,9 +253,11 @@ export default {
       article: {
         id: '',
         title: '',
+        desc: '',
         tagIds: [],
         categoryId: null,
         content: '',
+        state: null,
         status: '',
         listShow: true,
         headerShow: false,
@@ -274,9 +298,12 @@ export default {
         const data = {
           id: null,
           title: '',
+          desc: '',
           tags: [],
+          tag_id: 0,
           category: null,
           content: '',
+          state: null,
           status: this.$static.ArticleStatus.PUBLISH.key,
           listShow: true,
           headerShow: false,
@@ -291,10 +318,13 @@ export default {
     initArticle(data) {
       this.article.id = data.id
       this.article.title = data.title
-      this.article.tagIds =  [data.tag_id]
+      this.article.desc = data.desc
+      if(data.tag_id != 0)
+        this.article.tagIds =  [data.tag_id]
       this.article.categoryId = data.category ? data.category.id : null
       this.article.content = data.content
-      this.article.status = data.state ? '启用' : '禁用';
+      this.article.status = data.state ? '公示' : '隐藏';
+      this.article.state = data.state
       // this.article.listShow = data.listShow
       // this.article.headerShow = data.headerShow
       this.article.priority = data.priority  //暂时注释
@@ -379,11 +409,13 @@ export default {
           this.submitting = true
           let params = {
             id: this.article.id,
-            tag_id: this.article.tag_id,
+            tag_id: this.article.tagIds[0],
             title: this.article.title,
             desc: this.article.desc,
             content: this.article.content,
-            modified_by: this.userInfo
+            modified_by: this.userInfo,
+            created_by: this.userInfo,
+            state: this.article.state,
           }
 
           if(type == 'put') {
@@ -395,16 +427,15 @@ export default {
             }
             this.submitting = false
             })
-          }
-          else{
+          } else {
             this.$api.auth.saveArticle(params).then(res => {
-            if (res.status == 200) {
-              success(res.data.data)
-            } else {
-              this.$util.message.error('提交文章失败,' + res.data.msg)
-            }
-            this.submitting = false
-          })
+              if (res.status == 200) {
+                success(res.data.data)
+              } else {
+                this.$util.message.error('提交文章失败,' + res.data.msg)
+              }
+              this.submitting = false
+            })
           }
           
         }

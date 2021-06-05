@@ -14,7 +14,7 @@
 
 <script>
 const config = [
-  { name: 'ArticleList', title: '文章列表', link: '/article' },
+  { name: 'ArticleList', title: '文章列表', link: '/admin/article' },
   {
     name: 'ArticleNew',
     title: '新建文章',
