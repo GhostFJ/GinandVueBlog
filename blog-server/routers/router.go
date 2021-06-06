@@ -58,6 +58,18 @@ func InitRouter() *gin.Engine {
 			//删除
 			tag.DELETE(":id", v1.DeleteTag)
 		}
+		//分类
+		category := apiv1.Group("/categories")
+		{
+			//列表
+			category.GET("", v1.GetCategories)
+			//新建
+			category.POST("", v1.AddCategory)
+			//更新
+			category.PUT(":id", v1.EditCategory)
+			//删除
+			category.DELETE(":id", v1.DelCategory)
+		}
 		// 注册文章路由
 		RegisterArticleRouter(apiv1)
 

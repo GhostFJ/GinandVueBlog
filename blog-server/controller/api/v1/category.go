@@ -12,27 +12,23 @@ import (
 	"net/http"
 )
 
-// @Summary 文章标签列表
-// @Tags 标签管理
+// @Summary 文章分类列表
+// @Tags 分类管理
 // @Produce  json
 // @Security ApiKeyAuth
 // @Success 200 {string} gin.Context.JSON
-// @Router /api/v1/tags [get]
-func GetTags(c *gin.Context) {
+// @Router /api/v1/categories [get]
+func GetCategories(c *gin.Context) {
 	name := c.Query("name")
 	maps := make(map[string]interface{})
 	data := make(map[string]interface{})
 	if name != "" {
 		maps["name"] = name
 	}
-	state := -1
-	if arg := c.Query("state"); arg != "" {
-		state = com.StrTo(arg).MustInt()
-		maps["state"] = state
-	}
+
 	code := e.SUCCESS
-	data["list"] = models.GetTags(util.GetPage(c), setting.PageSize, maps)
-	data["total"] = models.GetTagTotal(maps)
+	data["list"] = models.GetCategories(util.GetPage(c), setting.PageSize, maps)
+	data["total"] = models.GetCategoryTotal(maps)
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
 		"msg":  e.GetMsg(code),
@@ -40,29 +36,28 @@ func GetTags(c *gin.Context) {
 	})
 }
 
-// @Summary 新增文章标签
-// @Tags 标签管理
+// @Summary 新增文章分类
+// @Tags 分类管理
 // @Produce  json
 // @Param name query string true "Name"
 // @Param state query int false "State"
 // @Param created_by query string true "CreatedBy"
 // @Security ApiKeyAuth
 // @Success 200 {string} gin.Context.JSON
-// @Router /api/v1/tags [post]
-func AddTag(c *gin.Context) {
-	var tag models.Tag
+// @Router /api/v1/categories [post]
+func AddCategory(c *gin.Context) {
+	var category models.Category
 
 	// ---> 绑定数据
-	if err := c.ShouldBindJSON(&tag); err != nil {
+	if err := c.ShouldBindJSON(&category); err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{"error": err.Error()})
 		return
 	}
 
-	name := tag.Name
-	state := tag.State
-	createdBy := tag.CreatedBy
+	name := category.Name
+	createdBy := category.CreatedBy
 
 	// name := c.Query("name")
 	// state := com.StrTo(c.DefaultQuery("state", "0")).MustInt()
@@ -73,13 +68,13 @@ func AddTag(c *gin.Context) {
 	valid.MaxSize(name, 100, "name").Message("名称最长为100字符")
 	valid.Required(createdBy, "created_by").Message("创建人不能为空")
 	valid.MaxSize(createdBy, 100, "created_by").Message("创建人最长为100字符")
-	valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
+
 
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
-		if !models.ExistTagByName(name) {
+		if !models.ExistCategoryByName(name) {
 			code = e.SUCCESS
-			models.AddTag(name, state, createdBy)
+			models.AddCategory(name, createdBy)
 		} else {
 			code = e.ERROR_EXIST_TAG
 		}
@@ -92,8 +87,8 @@ func AddTag(c *gin.Context) {
 
 }
 
-// @Summary 编辑文章标签
-// @Tags 标签管理
+// @Summary 编辑文章分类
+// @Tags 分类管理
 // @Produce  json
 // @Param id path int true "id"
 // @Param name query string true "Name"
@@ -101,24 +96,23 @@ func AddTag(c *gin.Context) {
 // @Param modified_by query string true "ModifiedBy"
 // @Security ApiKeyAuth
 // @Success 200 {string} gin.Context.JSON
-// @Router /api/v1/tags/{id} [put]
-func EditTag(c *gin.Context) {
+// @Router /api/v1/categories/{id} [put]
+func EditCategory(c *gin.Context) {
 	//id := c.Param("id")
 	id := com.StrTo(c.Param("id")).MustInt()
 
-	var tag models.Tag
+	var category models.Category
 
 	// ---> 绑定数据
-	if err := c.ShouldBindJSON(&tag); err != nil {
+	if err := c.ShouldBindJSON(&category); err != nil {
 		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{"error": err.Error()})
 		return
 	}
 
-	name := tag.Name
-	state := tag.State
-	modifiedBy := tag.ModifiedBy
+	name := category.Name
+	modifiedBy := category.ModifiedBy
 
 	// name := c.Query("name")
 	// modifiedBy := c.Query("modified_by")
@@ -127,25 +121,24 @@ func EditTag(c *gin.Context) {
 	// var state int = -1
 	// if arg := c.Query("state"); arg != "" {
 	// 	state = com.StrTo(arg).MustInt()
-		valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
+		// valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
 	// }
 	valid.Required(id, "id").Message("ID不能为空")
 	valid.Required(modifiedBy, "modified_by").Message("修改人不能为空")
 	valid.MaxSize(modifiedBy, 100, "modified_by").Message("修改人最长为100字符")
 	valid.MaxSize(name, 100, "name").Message("名称最长为100字符")
+
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
 		code = e.SUCCESS
-		if models.ExistTagByID(id) {
+		if models.ExistCategoryByID(id) {
 			data := make(map[string]interface{})
 			data["modified_by"] = modifiedBy
 			if name != "" {
 				data["name"] = name
 			}
-			if state != -1 {
-				data["state"] = state
-			}
-			models.EditTag(id, data)
+
+			models.EditCategory(id, data)
 		} else {
 			code = e.ERROR_NOT_EXIST_TAG
 		}
@@ -159,14 +152,14 @@ func EditTag(c *gin.Context) {
 
 }
 
-// @Summary 删除文章标签
-// @Tags 标签管理
+// @Summary 删除文章分类
+// @Tags 分类管理
 // @Produce  json
 // @Param id path int true "id"
 // @Security ApiKeyAuth
 // @Success 200 {string} gin.Context.JSON
-// @Router /api/v1/tags/{id} [delete]
-func DeleteTag(c *gin.Context) {
+// @Router /api/v1/categories/{id} [delete]
+func DelCategory(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 
 	valid := validation.Validation{}
@@ -175,8 +168,8 @@ func DeleteTag(c *gin.Context) {
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
 		code = e.SUCCESS
-		if models.ExistTagByID(id) {
-			models.DeleteTag(id)
+		if models.ExistCategoryByID(id) {
+			models.DelCategory(id)
 		} else {
 			code = e.ERROR_NOT_EXIST_TAG
 		}

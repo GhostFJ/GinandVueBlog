@@ -6,7 +6,7 @@
         <i v-else class="el-icon-s-unfold"></i>
       </a>
     </div>
-    <h3 class="title">Fang's Blog</h3>
+    <h3 class="title">{{userInfo}}'s Blog</h3>
     <ul class="nav-bar-right">
       <li>
         <a @click="logout">
@@ -19,12 +19,17 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapState } from 'vuex'
+
 export default {
   data() {
     return {
       iscollapse: false,
     }
   },
+  computed: mapState({
+    userInfo: (state) => state.userModule.userInfo,
+  }),
   methods: {
     collapse() {
       this.iscollapse = !this.iscollapse

@@ -14,14 +14,7 @@ const auth = {
     return request.post('/articles', article)
   },
   modifyArticle(param) {
-    return request.put('/articles/' + param.id, {
-      id: param.id,
-      tag_id: param.tag_id,
-      title: param.title,
-      desc: param.desc,
-      content: param.content,
-      modified_by: param.modified_by
-    })
+    return request.put('/articles/' + param.id, param)
   },
   deleteArticle(id) {
     return request.delete('/articles/' + id)

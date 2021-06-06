@@ -11,7 +11,7 @@ const service = axios.create({
 // Add a request interceptor
 service.interceptors.request.use((config) => {
   // 修改headers
-  Object.assign(config.headers, { Authorization: `${storageService.get(storageService.USER_TOKEN)}` });
+  Object.assign(config.headers, { Authorization: `Bearer ${storageService.get(storageService.USER_TOKEN)}` });
   return config;
 }, (error) => {
   // Do something with request error

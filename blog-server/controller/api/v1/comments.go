@@ -81,11 +81,25 @@ func GetComments(c *gin.Context) {
 
 // 新增
 func AddComments(c *gin.Context) {
-	articleId := com.StrTo(c.Query("article_id")).MustInt()
-	userId := com.StrTo(c.Query("user_id")).MustInt()
+	var comment models.Comment
 
-	content := c.Query("content")
-	createdBy := c.Query("created_by")
+	// ---> 绑定数据
+	if err := c.ShouldBindJSON(&comment); err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()})
+		return
+	}
+
+	articleId := comment.ArticleID
+	userId := comment.UserID
+	content := comment.Content
+	createdBy := comment.CreatedBy
+
+	// articleId := com.StrTo(c.Query("article_id")).MustInt()
+	// userId := com.StrTo(c.Query("user_id")).MustInt()
+	// content := c.Query("content")
+	// createdBy := c.Query("created_by")
 
 	valid := validation.Validation{}
 	valid.Min(articleId, 1, "article_id").Message("文章ID必须大于0")
@@ -96,7 +110,7 @@ func AddComments(c *gin.Context) {
 
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
-		if models.ExistArticleByID(articleId) {
+		if models.ExistArticleByID(articleId) && models.ExistUserByID(userId){
 			data := make(map[string]interface{})
 			data["article_id"] = articleId
 			data["user_id"] = userId
@@ -128,8 +142,21 @@ func EditComments(c *gin.Context) {
 
 	id := com.StrTo(c.Param("id")).MustInt()
 
-	content := c.Query("content")
-	modifiedBy := c.Query("modified_by")
+	var comment models.Comment
+
+	// ---> 绑定数据
+	if err := c.ShouldBindJSON(&comment); err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{"error": err.Error()})
+		return
+	}
+
+	content := comment.Content
+	modifiedBy := comment.ModifiedBy
+
+	// content := c.Query("content")
+	// modifiedBy := c.Query("modified_by") 
 
 	valid.Min(id, 1, "id").Message("ID必须大于0")
 

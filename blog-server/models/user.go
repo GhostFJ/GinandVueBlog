@@ -30,6 +30,15 @@ func LoginCheck(username, password string) (bool, User, error) {
 	return false, user, nil
 }
 
+// 判断用户是否存在
+func ExistUserByID(id int) bool {
+	var user User
+
+	db.Select("id").Where("id = ?", id).First(&user)
+
+	return user.ID > 0 
+}
+
 //通过ID 查找用户
 func FindUserById(id int) (User, error) {
 	var user User

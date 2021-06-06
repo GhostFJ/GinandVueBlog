@@ -64,6 +64,14 @@ func GetArticles(c *gin.Context) {
 		valid.Min(tagId, 1, "tag_id").Message("标签ID必须大于0")
 	}
 
+	var categoryId int = -1
+	if arg := c.Query("category_id"); arg != "" {
+		categoryId = com.StrTo(arg).MustInt()
+		maps["category_id"] = categoryId
+
+		valid.Min(categoryId, 1, "category_id").Message("分类ID必须大于0")
+	}
+
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
 		code = e.SUCCESS
@@ -97,6 +105,7 @@ func AddArticle(c *gin.Context) {
 	}
 
 	tagId := article.TagID
+	categoryId := article.CategoryID
 	title := article.Title
 	desc := article.Desc
 	content := article.Content
@@ -112,6 +121,7 @@ func AddArticle(c *gin.Context) {
 
 	valid := validation.Validation{}
 	valid.Min(tagId, 1, "tag_id").Message("标签ID必须大于0")
+	valid.Min(categoryId, 1, "category_id").Message("分类ID必须大于0")
 	valid.Required(title, "title").Message("标题不能为空")
 	valid.Required(desc, "desc").Message("简述不能为空")
 	valid.Required(content, "content").Message("内容不能为空")
@@ -123,6 +133,7 @@ func AddArticle(c *gin.Context) {
 		if models.ExistTagByID(tagId) {
 			data := make(map[string]interface{})
 			data["tag_id"] = tagId
+			data["category_id"] = categoryId
 			data["title"] = title
 			data["desc"] = desc
 			data["content"] = content
@@ -164,6 +175,7 @@ func EditArticle(c *gin.Context) {
 	}
 
 	tagId := article.TagID
+	categoryId := article.CategoryID
 	title := article.Title
 	desc := article.Desc
 	content := article.Content
@@ -177,11 +189,12 @@ func EditArticle(c *gin.Context) {
 
 	// var state int = -1
 	// if arg := article.State; arg != "" {
-		// state = com.StrTo(arg).MustInt()
-		valid.Range(article.State, 0, 1, "state").Message("状态只允许0或1")
+	// state = com.StrTo(arg).MustInt()
+	valid.Range(article.State, 0, 1, "state").Message("状态只允许0或1")
 	// }
 
 	valid.Min(id, 1, "id").Message("ID必须大于0")
+	valid.Min(categoryId, 1, "category_id").Message("分类ID必须大于0")
 	valid.MaxSize(title, 100, "title").Message("标题最长为100字符")
 	valid.MaxSize(desc, 255, "desc").Message("简述最长为255字符")
 	valid.MaxSize(content, 65535, "content").Message("内容最长为65535字符")
@@ -191,10 +204,13 @@ func EditArticle(c *gin.Context) {
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
 		if models.ExistArticleByID(id) {
-			if models.ExistTagByID(tagId) {
+			if models.ExistTagByID(tagId) && models.ExistCategoryByID(categoryId) {
 				data := make(map[string]interface{})
 				if tagId > 0 {
 					data["tag_id"] = tagId
+				}
+				if categoryId > 0 {
+					data["category_id"] = categoryId
 				}
 				if title != "" {
 					data["title"] = title
@@ -207,7 +223,7 @@ func EditArticle(c *gin.Context) {
 				}
 
 				data["modified_by"] = modifiedBy
-				
+
 				models.EditArticle(id, data)
 				code = e.SUCCESS
 			} else {
@@ -225,7 +241,9 @@ func EditArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
 		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
+		"data": map[string]interface{}{
+			"id": id,
+		},
 	})
 }
 

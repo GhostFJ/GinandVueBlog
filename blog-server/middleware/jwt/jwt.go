@@ -7,6 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 func JWT() gin.HandlerFunc {
@@ -15,10 +16,12 @@ func JWT() gin.HandlerFunc {
 		var data interface{}
 		appG := app.Gin{C: c}
 		code = e.SUCCESS
-		Authorization := c.GetHeader("Authorization") //在header中存放token
-		if Authorization == "" {
+		tokenString := c.GetHeader("Authorization") //在header中存放token
+
+		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
 			code = e.INVALID_PARAMS
 		} else {
+			Authorization := tokenString[7:]
 			claims, err := util.ParseToken(Authorization)
 			if err != nil {
 				switch err.(*jwt.ValidationError).Errors {

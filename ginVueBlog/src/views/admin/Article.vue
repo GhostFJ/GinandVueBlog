@@ -321,7 +321,7 @@ export default {
       this.article.desc = data.desc
       if(data.tag_id != 0)
         this.article.tagIds =  [data.tag_id]
-      this.article.categoryId = data.category ? data.category.id : null
+      this.article.categoryId = data.category ? data.category.name : null
       this.article.content = data.content
       this.article.status = data.state ? '公示' : '隐藏';
       this.article.state = data.state
@@ -343,22 +343,22 @@ export default {
       })
     },
     getCategories() {
-      // this.$api.auth.getAllCategories().then((data) => {
-      //   if (data.success) {
-      //     for (let key in data.data) {
-      //       // if (!data.data.hasOwnProperty(key)) {
-      //       //   continue
-      //       // }
-      //       let category = {
-      //         value: data.data[key].id,
-      //         label: data.data[key].name,
-      //       }
-      //       this.categories.push(category)
-      //     }
-      //   } else {
-      //     this.$util.message.error('获取分类列表失败')
-      //   }
-      // })
+      this.$api.auth.getAllCategories().then((res) => {
+        if (res.status == 200) {
+          for (let key in res.data.data.list) {
+            // if (!data.data.hasOwnProperty(key)) {
+            //   continue
+            // }
+            let category = {
+              value: res.data.data.list[key].id,
+              label: res.data.data.list[key].name,
+            }
+            this.categories.push(category)
+          }
+        } else {
+          this.$util.message.error('获取分类列表失败')
+        }
+      })
     },
     showMediaDialog(page = 1) {
       this.isMobile = document.body.clientWidth < 768
@@ -410,6 +410,7 @@ export default {
           let params = {
             id: this.article.id,
             tag_id: this.article.tagIds[0],
+            category_id: this.article.categoryId,
             title: this.article.title,
             desc: this.article.desc,
             content: this.article.content,
@@ -417,16 +418,15 @@ export default {
             created_by: this.userInfo,
             state: this.article.state,
           }
-
           if(type == 'put') {
             this.$api.auth.modifyArticle(params).then(res => {
               if (res.status == 200) {
-              success(res.data.data)
-            } else {
-              this.$util.message.error('提交文章失败,' + res.data.msg)
-            }
-            this.submitting = false
-            })
+                success(res.data.data)
+              } else {
+                this.$util.message.error('提交文章失败,' + res.data.msg)
+              }
+              this.submitting = false
+              })
           } else {
             this.$api.auth.saveArticle(params).then(res => {
               if (res.status == 200) {
