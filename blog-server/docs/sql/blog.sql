@@ -108,10 +108,10 @@ COMMIT;
 
 
 -- ----------------------------
---  Table structure for `blog_comments`
+--  Table structure for `blog_comment`
 -- ----------------------------
-DROP TABLE IF EXISTS `blog_comments`;
-CREATE TABLE `blog_comments` (
+DROP TABLE IF EXISTS `blog_comment`;
+CREATE TABLE `blog_comment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `article_id` int unsigned DEFAULT '0' COMMENT '文章ID',
   `user_id` int unsigned DEFAULT '0' COMMENT '用户ID',
@@ -125,10 +125,10 @@ CREATE TABLE `blog_comments` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='评论管理';
 
 -- ----------------------------
---  Records of `blog_comments`
+--  Records of `blog_comment`
 -- ----------------------------
 BEGIN;
-INSERT INTO `blog_comments` VALUES 
+INSERT INTO `blog_comment` VALUES 
 ('1', '1', '1', 'test', '0', '', '0', '', '0'),
 ('2', '1', '1', '写的不错', '0', '', '0', '', '0');
 COMMIT;

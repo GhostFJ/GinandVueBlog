@@ -123,12 +123,12 @@ export default {
       this.init()
     },
     init() {
-      this.$api.auth.pageComment(this.currentPage).then((data) => {
-        this.commentDatas = data.data.list
-        this.total = data.data.total
-        this.pageSize = data.data.pageSize
+      this.$api.auth.pageComment(this.currentPage).then((res) => {
+        this.commentDatas = res.data.data.lists
+        this.total = res.data.data.total
+        // this.pageSize = data.data.pageSize
         for (let comment of this.commentDatas) {
-          comment.created = this.$dayjs(comment.created).format(
+          comment.created = this.$dayjs.unix(comment.created_on).format(
             'YYYY-MM-DD HH:mm'
           )
         }

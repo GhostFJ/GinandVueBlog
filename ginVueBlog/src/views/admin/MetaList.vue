@@ -1,24 +1,38 @@
 <template>
   <div>
     <el-row :gutter="30">
-      <el-col :xs="24" :sm="12" :md="12" :lg="12" style="margin-top: 30px">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="12"
+        :lg="12"
+        style="margin-top: 30px"
+      >
         <el-card>
           <div slot="header">
             <span>标签列表</span>
           </div>
           <ul class="meta-list">
-            <li v-for="tag in tags" :key="tag.id">
-              <span class="meta" @click="clickTag(tag.id, tag.name)">
+            <li
+              v-for="tag in tags"
+              :key="tag.id"
+            >
+              <span
+                class="meta"
+                @click="clickTag(tag.id, tag.name)"
+              >
                 {{ tag.name }}
               </span>
               <span style="float: right; clear: both">
-                <span class="meta-count">{{ tag.articleInfos.length }}</span>
+                <span class="meta-count">
+                  {{ tag.created_by}}
+                  <!-- {{ tag.articleInfos.length }} -->
+                </span>
                 <el-button
                   type="danger"
                   size="small"
                   @click="deleteTagHandle(tag.id)"
-                  >删除</el-button
-                >
+                >删除</el-button>
               </span>
             </li>
           </ul>
@@ -32,17 +46,26 @@
             size="small"
             style="float: right; clear: both"
             @click="saveOrUpdateTag"
-            >保存标签
+          >保存标签
           </el-button>
         </el-card>
       </el-col>
-      <el-col :xs="24" :sm="12" :md="12" :lg="12" style="margin-top: 30px">
+      <el-col
+        :xs="24"
+        :sm="12"
+        :md="12"
+        :lg="12"
+        style="margin-top: 30px"
+      >
         <el-card>
           <div slot="header">
             <span>分类列表</span>
           </div>
           <ul class="meta-list">
-            <li v-for="category in categories" :key="category.id">
+            <li
+              v-for="category in categories"
+              :key="category.id"
+            >
               <span
                 class="meta"
                 @click="clickCategory(category.id, category.name)"
@@ -50,15 +73,15 @@
                 {{ category.name }}
               </span>
               <span style="float: right; clear: both">
-                <span class="meta-count">{{
-                  category.articleInfos.length
-                }}</span>
+                <span class="meta-count">
+                  {{ category.created_by }}
+                  <!-- {{ category.articleInfos.length }} -->
+                </span>
                 <el-button
                   type="danger"
                   size="small"
                   @click="deleteCategoryHandle(category.id)"
-                  >删除</el-button
-                >
+                >删除</el-button>
               </span>
             </li>
           </ul>
@@ -72,7 +95,7 @@
             size="small"
             style="float: right; clear: both"
             @click="saveOrUpdateCategory"
-            >保存分类
+          >保存分类
           </el-button>
         </el-card>
       </el-col>
@@ -81,6 +104,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapState } from 'vuex'
+
 export default {
     data() {
         return {
@@ -92,15 +117,18 @@ export default {
             categoryName: ''
         }
     },
+    computed: mapState({
+      userInfo: (state) => state.userModule.userInfo,
+    }),
     methods: {
         getTags() {
-            this.$api.auth.getAllTags().then(data => {
-              this.tags = data.data
+            this.$api.auth.getAllTags().then(res => {
+              this.tags = res.data.data.list
             })
         },
         getCategories() {
-            this.$api.auth.getAllCategories().then(data => {
-              this.categories = data.data
+            this.$api.auth.getAllCategories().then(res => {
+              this.categories = res.data.data.list
             })
         },
         clickTag(tagId, tagName) {
@@ -143,37 +171,82 @@ export default {
             }).catch(() => {
             })
         },
-        saveOrUpdateTag() {
-            if (this.tagName === null || this.tagName === '') {
-                this.$message({
-                    message: '标签名称不能为空',
-                    type: 'error'
-                })
-                return
+        isInArray(id, list) {
+          for(let k of list) {
+            if(k.id == id) {
+              return true
             }
-          this.$api.auth.saveOrUpdateTag(this.tagId, this.tagName).then(() => {
-            this.refreshTags()
-            this.$message({
-              message: '编辑标签成功!',
-              type: 'success'
+          }
+          return false
+        },
+        saveOrUpdateTag() {
+          if (this.tagName === null || this.tagName === '') {
+              this.$message({
+                  message: '标签名称不能为空',
+                  type: 'error'
+              })
+              return
+          }
+          const params = {
+            id: this.tagId,
+            name: this.tagName,
+            state: 1,  // 默认启用
+            created_by: this.userInfo,
+            modified_by: this.userInfo
+          }
+          if(this.isInArray(this.tagId, this.tags)) {
+            // 修改标签
+            this.$api.auth.modifyTag(params).then(() => {
+              this.refreshTags()
+              this.$message({
+                message: '编辑标签成功!',
+                type: 'success'
+              })
             })
-          })
+          } else {
+            // 新建标签
+            this.$api.auth.saveTag(params).then(() => {
+              this.refreshTags()
+              this.$message({
+                message: '新建标签成功!',
+                type: 'success'
+              })
+            })
+          }
         },
         saveOrUpdateCategory() {
-            if (this.categoryName === null || this.categoryName === '') {
-                this.$message({
-                    message: '分类名称不能为空',
-                    type: 'error'
-                })
-                return
-            }
-          this.$api.auth.saveOrUpdateCategory(this.categoryId, null, this.categoryName).then(() => {
-            this.refreshCategories()
-            this.$message({
-              message: '编辑分类成功!',
-              type: 'success'
+          if (this.categoryName === null || this.categoryName === '') {
+              this.$message({
+                  message: '分类名称不能为空',
+                  type: 'error'
+              })
+              return
+          }
+          const params = {
+            id: this.categoryId,
+            name: this.categoryName,
+            created_by: this.userInfo,
+            modified_by: this.userInfo
+          }
+          if(this.isInArray(this.categoryId, this.categories)) {
+            // 修改分类
+            this.$api.auth.modifyCategory(params).then(() => {
+              this.refreshCategories()
+              this.$message({
+                message: '编辑分类成功!',
+                type: 'success'
+              })
             })
-          })
+          } else {
+            // 新增分类
+            this.$api.auth.saveCategory(params).then(() => {
+              this.refreshCategories()
+              this.$message({
+                message: '新增分类成功!',
+                type: 'success'
+              })
+            })
+          }
         },
         refreshTags() {
             this.getTags()

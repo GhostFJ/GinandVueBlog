@@ -80,7 +80,7 @@ func GetComments(c *gin.Context) {
 }
 
 // 新增
-func AddComments(c *gin.Context) {
+func AddComment(c *gin.Context) {
 	var comment models.Comment
 
 	// ---> 绑定数据
@@ -137,7 +137,7 @@ func AddComments(c *gin.Context) {
 }
 
 // 修改
-func EditComments(c *gin.Context) {
+func EditComment(c *gin.Context) {
 	valid := validation.Validation{}
 
 	id := com.StrTo(c.Param("id")).MustInt()
@@ -200,7 +200,7 @@ func EditComments(c *gin.Context) {
 }
 
 // 删除
-func DeleteComments(c *gin.Context) {
+func DeleteComment(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 
     valid := validation.Validation{}

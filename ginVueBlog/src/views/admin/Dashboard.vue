@@ -67,23 +67,24 @@ export default {
   },
   methods: {
     countComment(data) {
-      if (!data.success) {
+      if (data.code != 200) {
         return
       }
-      this.commentCount = data.data
+      this.commentCount = data.data.total
     },
     countPost(data) {
-      if (!data.success) {
+      if (data.code != 200) {
         return
       }
-      this.articleCount = data.data
+      this.articleCount = data.data.total
     },
     pageComment(data) {
-      if (!data.success) {
+      if (data.code != 200) {
         return
       }
-      for (let key in data.data.list) {
-        let comment = data.data.list[key]
+      
+      for (let key in data.data.lists) {
+        let comment = data.data.lists[key]
         if (comment.content.length > 200) {
           comment.content = comment.content.substring(0, 80) + '...'
         }
@@ -91,28 +92,28 @@ export default {
       }
     },
     pagePost(data) {
-      if (!data.success) {
+      if (data.code != 200) {
         return
       }
-      for (let key in data.data.list) {
-        let d = data.data.list[key]
+      for (let key in data.data.lists) {
+        let d = data.data.lists[key]
         let article = d.title
         this.articles.push(article)
       }
     },
-    initData(postData, commentData, postCountData, commentCountData) {
-      this.pagePost(postData)
-      this.pageComment(commentData)
-      this.countPost(postCountData)
-      this.countComment(commentCountData)
+    initData(postData, commentData) {
+      this.pagePost(postData.data)
+      this.pageComment(commentData.data)
+      this.countPost(postData.data)
+      this.countComment(commentData.data)
     },
     init() {
       this.$axios
         .all([
           this.$api.auth.pageArticle(1),
           this.$api.auth.pageComment(1),
-          this.$api.auth.countArticle(),
-          this.$api.auth.countComment(),
+          // this.$api.auth.countArticle(),
+          // this.$api.auth.countComment(),
         ])
         .then(this.$axios.spread(this.initData))
     },

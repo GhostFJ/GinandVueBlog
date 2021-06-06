@@ -5,13 +5,14 @@ import (
 	"blog/models/schema"
 	"blog/pkg/util/hash"
 	"blog/pkg/util/rand"
-	"github.com/dchest/captcha"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dchest/captcha"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/jinzhu/gorm"
 
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
@@ -158,13 +159,14 @@ func CurrentUser(c *gin.Context) {
 	var user currentUser
 	appG := app.Gin{C: c}
 	code = e.SUCCESS
-	Authorization := c.GetHeader("Authorization") //在header中存放token
-	token := strings.Split(Authorization, " ")
-	//token := c.Query("token")
-	if Authorization == "" {
+	tokenString := c.GetHeader("Authorization") //在header中存放token
+	// token := strings.Split(Authorization, " ")
+	// token := c.Query("token")
+	if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
 		code = e.INVALID_PARAMS
 	} else {
-		claims, err := util.ParseToken(token[0])
+		Authorization := tokenString[7:]
+		claims, err := util.ParseToken(Authorization)
 		if err != nil {
 			switch err.(*jwt.ValidationError).Errors {
 			case jwt.ValidationErrorExpired:
